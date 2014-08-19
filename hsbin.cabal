@@ -19,6 +19,8 @@ cabal-version:       >=1.10
 executable hsbin
   main-is:             Main.hs
   other-modules:       Hsbin
+                       Hsbin.Command
+                       Hsbin.Routine
                        Hsbin.Types
   -- other-extensions:    
   build-depends:       base >=4.7 && <4.8,

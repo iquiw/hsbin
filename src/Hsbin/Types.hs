@@ -2,9 +2,10 @@
 module Hsbin.Types where
 
 import Control.Applicative ((<$>), (<*>))
+import Data.Aeson
+import Data.Maybe (listToMaybe)
 import System.FilePath ((<.>), (</>))
 import System.Info (os)
-import Data.Aeson
 
 data HsbinEnv = HsbinEnv
     { heAppDir :: FilePath
@@ -49,3 +50,10 @@ heConfigPath =  (</> "config.json") . heAppDir
 
 heBinDir :: HsbinEnv -> FilePath
 heBinDir = (</> "bin") . heAppDir
+
+hsBinPath :: HsbinEnv -> HsbinScript -> FilePath
+hsBinPath henv hscr = heBinDir henv </> exe (hsName hscr)
+
+lookupScript :: HsbinConfig -> String -> Maybe HsbinScript
+lookupScript hcfg name =
+    listToMaybe $ filter ((name ==) . hsName) $ hcScripts hcfg
