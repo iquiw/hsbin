@@ -1,7 +1,9 @@
 module Hsbin.Command where
 
+import Control.Monad (unless)
 import Data.Maybe (listToMaybe)
 
+import Hsbin.Hash
 import Hsbin.Routine
 import Hsbin.Types
 
@@ -32,9 +34,14 @@ actRun :: Action
 actRun henv hcfg (name:args) =
     case lookupScript hcfg name of
         Just hscr -> do
-            compile henv hscr
+            h <- hscrHash hscr
+            b <- eqHash henv hscr h
+            unless b $ do
+                compile henv hscr
+                writeHash henv hscr h
             execute henv hscr args
         Nothing   -> msg $ "Script not found: " ++ name
+actRun _ _ [] = msg "hsbin: run needs script name"
 
 actHelp :: Action
 actHelp _ _ _ = help

@@ -2,7 +2,7 @@ module Main where
 
 import Control.Applicative ((<$>), (<*>))
 import Control.Exception (finally)
-import System.Directory ( createDirectory, createDirectoryIfMissing,
+import System.Directory ( createDirectoryIfMissing,
                           getAppUserDataDirectory,
                           getTemporaryDirectory, removeDirectoryRecursive )
 import System.Environment (getArgs)
@@ -21,5 +21,6 @@ main = do
     let tmpDir = heTmpDir henv
     createDirectoryIfMissing False $ heAppDir henv
     createDirectoryIfMissing False $ heBinDir henv
+    createDirectoryIfMissing False $ heHashDir henv
     createDirectoryIfMissing False tmpDir
     runHsbin henv hcfg args `finally` removeDirectoryRecursive tmpDir

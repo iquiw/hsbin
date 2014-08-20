@@ -51,8 +51,14 @@ heConfigPath =  (</> "config.json") . heAppDir
 heBinDir :: HsbinEnv -> FilePath
 heBinDir = (</> "bin") . heAppDir
 
+heHashDir :: HsbinEnv -> FilePath
+heHashDir = (</> "hash") . heAppDir
+
 hsBinPath :: HsbinEnv -> HsbinScript -> FilePath
 hsBinPath henv hscr = heBinDir henv </> exe (hsName hscr)
+
+hsHashPath :: HsbinEnv -> HsbinScript -> FilePath
+hsHashPath henv hscr = heHashDir henv </> hsName hscr
 
 lookupScript :: HsbinConfig -> String -> Maybe HsbinScript
 lookupScript hcfg name =
