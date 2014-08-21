@@ -12,12 +12,16 @@ type Action = HsbinEnv -> HsbinConfig -> [String] -> IO ()
 data Command = Command
     { cmdNames  :: [String]
     , cmdAction :: Action
-    , cmdDescr  :: String
+    , cmdDescr  :: ([String], String)
     }
 
 commands :: [Command]
-commands = [ Command ["help"] actHelp "show this help"
-           , Command ["run"] actRun "run script NAME, build it if necessary"
+commands = [ Command ["help"] actHelp
+             ([], "show this help")
+           , Command ["list", "ls"] actList
+             ([], "list available scripts")
+           , Command ["run"] actRun
+             (["NAME"], "run script NAME, build it if necessary")
            ]
 
 cmdHelp :: Command
@@ -29,6 +33,11 @@ lookupCommand (cname:args) =
         Just cmd -> (cmd, args)
         Nothing  -> (cmdHelp, [])
 lookupCommand _            = (cmdHelp, [])
+
+actList :: Action
+actList _ hcfg _ = do
+    let scrs = hcScripts hcfg
+    msg $ unlines $ "Available scripts:" : map (("  " ++) . hsName) scrs
 
 actRun :: Action
 actRun henv hcfg (name:args) =
@@ -47,10 +56,18 @@ actHelp :: Action
 actHelp _ _ _ = help
 
 help :: IO ()
-help = msg $ unlines
+help = msg $ unlines $
        [ "usage: hsbin COMMAND [ARG..]"
        , ""
        , "commands:"
-       , "   help       : show this help."
-       , "   run NAME   : run script NAME, build it if necessary."
-       ]
+       ] ++ map descr commands
+  where
+    align n s = take n $ s ++ replicate n ' '
+
+    descr cmd = let (name:aliases) = cmdNames cmd
+                    (args, desc)   = cmdDescr cmd
+                in align 30 ("  " ++ name ++ " " ++ unwords args)
+                   ++ ": " ++ desc
+                   ++ if null aliases
+                      then ""
+                      else " (" ++ unwords aliases ++ ")"
