@@ -21,15 +21,14 @@ compile henv hscr = do
                        (heTmpDir henv </> exe (hsName hscr))
                        (heBinDir henv </> exe (hsName hscr))
 
-        _ -> error ("hsbin: " ++ hsName hscr ++ " compilation failed")
+        _ -> error $ hsName hscr ++ " compilation failed"
 
 execute :: HsbinEnv -> HsbinScript -> [String] -> IO ()
 execute henv hscr args = do
     ph <- runProcess (hsBinPath henv hscr) args
           Nothing Nothing Nothing Nothing Nothing
     ec <- waitForProcess ph
-    unless (ec == ExitSuccess) $
-        error ("hsbin: " ++ hsName hscr ++ " execution failed")
+    unless (ec == ExitSuccess) $ error $ hsName hscr ++ " execution failed"
 
 msg :: String -> IO ()
 msg = hPutStr stderr
