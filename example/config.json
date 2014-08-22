@@ -1,0 +1,12 @@
+{
+  "scripts": [
+    { "name": "foo"
+    , "path": "/path/to/foo.hs"
+    , "opts": ["-O2", "-threaded"]
+    },
+    { "name": "bar"
+    , "path": "/path/to/foo.hs"
+    , "opts": []
+    }
+  ]
+}
