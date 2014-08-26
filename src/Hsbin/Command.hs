@@ -22,6 +22,8 @@ commands = [ Command ["help"] actHelp
              ([], "list available scripts")
            , Command ["run"] actRun
              (["NAME"], "run script NAME, build it if necessary")
+           , Command ["update"] actUpdate
+             (["[NAME..]"], "compile all or specified scripts it if necessary")
            ]
 
 cmdHelp :: Command
@@ -49,8 +51,26 @@ actRun henv hcfg (name:args) =
                 compile henv hscr
                 writeHash henv hscr h
             execute henv hscr args
-        Nothing   -> msg $ "Script not found: " ++ name
-actRun _ _ [] = msg "hsbin: run needs script name"
+        Nothing   -> msgLn $ "Script not found: " ++ name
+actRun _ _ [] = msgLn "hsbin: run needs script name"
+
+
+actUpdate :: Action
+actUpdate henv hcfg args =
+    case args of
+        [] -> mapM_ update $ hcScripts hcfg
+        _  -> mapM_ (\n -> maybe (nfnd n) update $ lookupScript hcfg n) args
+  where
+    nfnd n = msgLn $ "[NOT FOUND] " ++ n
+
+    update hscr = do
+        h <- hscrHash hscr
+        b <- eqHash henv hscr h
+        if b
+            then msgLn $ "[LATEST]    " ++ hsName hscr
+            else do compile henv hscr
+                    writeHash henv hscr h
+                    msgLn $  "[COMPILED]  " ++ hsName hscr
 
 actHelp :: Action
 actHelp _ _ _ = help

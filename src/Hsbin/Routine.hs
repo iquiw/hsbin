@@ -4,7 +4,7 @@ import Control.Monad (unless)
 import System.Directory
 import System.Exit
 import System.FilePath ((</>))
-import System.IO (hPutStr, stderr)
+import System.IO (hPutStr, hPutStrLn, stderr)
 import System.Process
 
 import Hsbin.Types
@@ -32,3 +32,6 @@ execute henv hscr args = do
 
 msg :: String -> IO ()
 msg = hPutStr stderr
+
+msgLn :: String -> IO ()
+msgLn = hPutStrLn stderr
