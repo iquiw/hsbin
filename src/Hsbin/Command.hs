@@ -23,7 +23,7 @@ commands = [ Command ["help"] actHelp
            , Command ["run"] actRun
              (["NAME"], "run script NAME, build it if necessary")
            , Command ["update"] actUpdate
-             (["[NAME..]"], "compile all or specified scripts it if necessary")
+             (["[NAME..]"], "compile all or specified scripts if necessary")
            ]
 
 cmdHelp :: Command
