@@ -23,7 +23,8 @@ commands = [ Command ["help"] actHelp
            , Command ["run"] actRun
              (["NAME"], "run script NAME, build it if necessary")
            , Command ["update"] actUpdate
-             (["[NAME..]"], "compile all or specified scripts if necessary")
+             (["[-f] [NAME..]"],
+              "compile all or specified scripts if necessary")
            ]
 
 cmdHelp :: Command
@@ -57,20 +58,29 @@ actRun _ _ [] = msgLn "hsbin: run needs script name"
 
 actUpdate :: Action
 actUpdate henv hcfg args =
-    case args of
-        [] -> mapM_ update $ hcScripts hcfg
-        _  -> mapM_ (\n -> maybe (nfnd n) update $ lookupScript hcfg n) args
+    case parseArgs args of
+        (force, [])    -> mapM_ (update force) $ hcScripts hcfg
+        (force, args') -> mapM_ (\n -> maybe (nfnd n) (update force) $
+                                       lookupScript hcfg n) args'
   where
+    parseArgs []        = (False, [])
+    parseArgs ("-f":xs) = (True, xs)
+    parseArgs xs        = (False, xs)
+
     nfnd n = msgLn $ "[NOT FOUND] " ++ n
 
-    update hscr = do
+    update force hscr = do
         h <- hscrHash hscr
-        b <- eqHash henv hscr h
-        if b
-            then msgLn $ "[LATEST]    " ++ hsName hscr
-            else do compile henv hscr
+        same <- eqHash henv hscr h
+        let (needCompile, tag) = case (same, force) of
+                (False, _)    -> (True,  "[COMPILED]  ")
+                (True, False) -> (False, "[LATEST]    ")
+                (True, True)  -> (True,  "[FORCE]     ")
+        if needCompile
+            then do compile henv hscr
                     writeHash henv hscr h
-                    msgLn $  "[COMPILED]  " ++ hsName hscr
+                    msgLn $ tag ++ hsName hscr
+            else msgLn $ tag ++ hsName hscr
 
 actHelp :: Action
 actHelp _ _ _ = help
