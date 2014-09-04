@@ -1,9 +1,10 @@
 module Hsbin.Routine where
 
+import Control.Exception (finally)
 import Control.Monad (unless)
-import System.Directory
-import System.Exit
-import System.FilePath ((</>))
+import System.Directory (copyFile, createDirectoryIfMissing,
+                         removeDirectoryRecursive)
+import System.Exit (ExitCode(..))
 import System.IO (hPutStr, hPutStrLn, stderr)
 import System.Process
 
@@ -11,17 +12,21 @@ import Hsbin.Types
 
 compile :: HsbinEnv -> HsbinScript -> IO ()
 compile henv hscr = do
-    let args = hsOpts hscr ++ [ "-outputdir", heTmpDir henv
-                              , "-o", heTmpDir henv </> hsName hscr
-                              , hsPath hscr]
-    ph <- runProcess "ghc" args Nothing Nothing Nothing Nothing Nothing
-    ec <- waitForProcess ph
-    case ec of
-        ExitSuccess -> copyFile
-                       (heTmpDir henv </> exe (hsName hscr))
-                       (heBinDir henv </> exe (hsName hscr))
-
-        _ -> error $ hsName hscr ++ " compilation failed"
+    createDirectoryIfMissing True tmpDir
+    go `finally` removeDirectoryRecursive tmpDir
+  where
+    tmpDir = hsTmpDir henv hscr
+    go = do
+        let args = hsOpts hscr ++ [ "-outputdir", tmpDir
+                                  , "-o", hsTmpBinPath henv hscr
+                                  , hsPath hscr]
+        ph <- runProcess "ghc" args Nothing Nothing Nothing Nothing Nothing
+        ec <- waitForProcess ph
+        case ec of
+            ExitSuccess -> copyFile
+                           (hsTmpBinPath henv hscr)
+                           (hsBinPath henv hscr)
+            _           -> error $ hsName hscr ++ " compilation failed"
 
 execute :: HsbinEnv -> HsbinScript -> [String] -> IO ()
 execute henv hscr args = do

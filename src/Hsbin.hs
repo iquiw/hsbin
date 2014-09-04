@@ -1,12 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Hsbin where
 
-import           Control.Exception (finally)
 import           Data.Aeson
 import qualified Data.ByteString.Lazy as LB
-import           System.Directory (createDirectoryIfMissing,
-                                   doesFileExist,
-                                   removeDirectoryRecursive)
+import           System.Directory (createDirectoryIfMissing, doesFileExist)
 
 import           Hsbin.Command
 import           Hsbin.Types
@@ -14,9 +11,7 @@ import           Hsbin.Types
 runHsbin :: HsbinEnv -> HsbinConfig -> [String] -> IO ()
 runHsbin henv hcfg args = do
     let (cmd, args') = lookupCommand args
-        tmpDir       = heTmpDir henv
-    createDirectoryIfMissing False tmpDir
-    cmdAction cmd henv hcfg args' `finally` removeDirectoryRecursive tmpDir
+    cmdAction cmd henv hcfg args'
 
 readHsbinConfig :: FilePath -> IO HsbinConfig
 readHsbinConfig file = do

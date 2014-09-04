@@ -60,6 +60,12 @@ hsBinPath henv hscr = heBinDir henv </> exe (hsName hscr)
 hsHashPath :: HsbinEnv -> HsbinScript -> FilePath
 hsHashPath henv hscr = heHashDir henv </> hsName hscr
 
+hsTmpDir :: HsbinEnv -> HsbinScript -> FilePath
+hsTmpDir henv hscr = heTmpDir henv </> hsName hscr
+
+hsTmpBinPath :: HsbinEnv -> HsbinScript -> FilePath
+hsTmpBinPath henv hscr = heTmpDir henv </> hsName hscr </> exe (hsName hscr)
+
 lookupScript :: HsbinConfig -> String -> Maybe HsbinScript
 lookupScript hcfg name =
     listToMaybe $ filter ((name ==) . hsName) $ hcScripts hcfg
