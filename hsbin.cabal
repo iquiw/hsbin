@@ -2,7 +2,7 @@
 --  see http://haskell.org/cabal/users-guide/
 
 name:                hsbin
-version:             0.1.0.0
+version:             0.1.1.0
 synopsis:            Haskell script runner
 -- description:         
 homepage:            https://github.com/iquiw/hsbin

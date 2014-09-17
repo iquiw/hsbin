@@ -16,8 +16,9 @@ data Command = Command
     }
 
 commands :: [Command]
-commands = [ Command ["help"] actHelp
-             ([], "show this help")
+commands = [ cmdHelp
+           , Command ["clean"] actClean
+             ([], "clean garbages")
            , Command ["list", "ls"] actList
              ([], "list available scripts")
            , Command ["run"] actRun
@@ -28,7 +29,7 @@ commands = [ Command ["help"] actHelp
            ]
 
 cmdHelp :: Command
-cmdHelp = head commands
+cmdHelp = Command ["help"] actHelp ([], "show this help")
 
 lookupCommand :: [String] -> (Command, [String])
 lookupCommand (cname:args) =
@@ -36,6 +37,17 @@ lookupCommand (cname:args) =
         Just cmd -> (cmd, args)
         Nothing  -> (cmdHelp, [])
 lookupCommand _            = (cmdHelp, [])
+
+actClean :: Action
+actClean henv hcfg _ = do
+    tmps <- cleanTmp henv hcfg
+    unless (null tmps) $ msgLn $ "Tmp removed  : " ++ unwords tmps
+
+    hashes <- cleanHash henv hcfg
+    unless (null hashes) $ msgLn $ "Hash removed : " ++ unwords hashes
+
+    bins <- cleanBin henv hcfg
+    unless (null bins) $ msgLn $ "Bin removed  : " ++ unwords bins
 
 actList :: Action
 actList _ hcfg _ = do
