@@ -1,5 +1,6 @@
 module Hsbin.Routine
-    ( cleanBin
+    ( align
+    , cleanBin
     , cleanHash
     , cleanTmp
     , compile
@@ -81,3 +82,6 @@ msg = hPutStr stderr
 
 msgLn :: String -> IO ()
 msgLn = hPutStrLn stderr
+
+align :: Int -> String -> String
+align n = take n . (++ replicate n ' ')

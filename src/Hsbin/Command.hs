@@ -20,7 +20,7 @@ commands = [ cmdHelp
            , Command ["clean"] actClean
              ([], "clean garbages")
            , Command ["list", "ls"] actList
-             ([], "list available scripts")
+             (["[-l]"], "list available scripts")
            , Command ["run"] actRun
              (["NAME"], "run script NAME, build it if necessary")
            , Command ["update"] actUpdate
@@ -41,18 +41,25 @@ lookupCommand _            = (cmdHelp, [])
 actClean :: Action
 actClean henv hcfg _ = do
     tmps <- cleanTmp henv hcfg
-    unless (null tmps) $ msgLn $ "Tmp removed  : " ++ unwords tmps
+    unless (null tmps) $
+        msgLn $ align 12 "Tmp removed" ++ " : " ++ unwords tmps
 
     hashes <- cleanHash henv hcfg
-    unless (null hashes) $ msgLn $ "Hash removed : " ++ unwords hashes
+    unless (null hashes) $
+        msgLn $ align 12 "Hash removed" ++ " : " ++ unwords hashes
 
     bins <- cleanBin henv hcfg
-    unless (null bins) $ msgLn $ "Bin removed  : " ++ unwords bins
+    unless (null bins) $
+        msgLn $ align 12 "Bin removed" ++ " : " ++ unwords bins
 
 actList :: Action
-actList _ hcfg _ = do
+actList _ hcfg args = do
     let scrs = hcScripts hcfg
-    msg $ unlines $ "Available scripts:" : map (("  " ++) . hsName) scrs
+        fmt  = if args == ["-l"] then long else short
+    msg $ unlines $ "Available scripts:" : map fmt scrs
+  where
+    short    = ("  " ++) . hsName
+    long scr = "  " ++ align 12 (hsName scr) ++ hsPath scr
 
 actRun :: Action
 actRun henv hcfg (name:args) =
@@ -79,15 +86,15 @@ actUpdate henv hcfg args =
     parseArgs ("-f":xs) = (True, xs)
     parseArgs xs        = (False, xs)
 
-    nfnd n = msgLn $ "[NOT FOUND] " ++ n
+    nfnd n = msgLn $ align 12 "[NOT FOUND]" ++ n
 
     update force hscr = do
         h <- hscrHash hscr
         same <- eqHash henv hscr h
         let (needCompile, tag) = case (same, force) of
-                (False, _)    -> (True,  "[COMPILED]  ")
-                (True, False) -> (False, "[LATEST]    ")
-                (True, True)  -> (True,  "[FORCE]     ")
+                (False, _)    -> (True,  align 12 "[COMPILED]")
+                (True, False) -> (False, align 12 "[LATEST]")
+                (True, True)  -> (True,  align 12 "[FORCE]")
         if needCompile
             then do compile henv hscr
                     writeHash henv hscr h
@@ -104,8 +111,6 @@ help = msg $ unlines $
        , "commands:"
        ] ++ map descr commands
   where
-    align n s = take n $ s ++ replicate n ' '
-
     descr cmd = let (name:aliases) = cmdNames cmd
                     (args, desc)   = cmdDescr cmd
                 in align 30 ("  " ++ name ++ " " ++ unwords args)
