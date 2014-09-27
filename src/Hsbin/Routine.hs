@@ -62,9 +62,14 @@ cleanHash henv hcfg = do
 
 cleanTmp :: HsbinEnv -> HsbinConfig -> IO [FilePath]
 cleanTmp henv hcfg = do
-    fs <- filterDir (map hsName $ hcScripts hcfg) (heTmpDir henv)
-    mapM_ removeDirectoryRecursive fs
-    return $ map takeFileName fs
+    let tmpDir = heTmpDir henv
+    b <- doesDirectoryExist tmpDir
+    if b
+        then do
+           fs <- filterDir (map hsName $ hcScripts hcfg) tmpDir
+           mapM_ removeDirectoryRecursive fs
+           return $ map takeFileName fs
+        else return []
 
 filterFile :: [String] -> FilePath -> IO [FilePath]
 filterFile names dir = filterM doesFileExist =<< filterContents names dir
