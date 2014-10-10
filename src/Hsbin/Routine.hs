@@ -3,6 +3,7 @@ module Hsbin.Routine
     , cleanBin
     , cleanHash
     , cleanTmp
+    , doesBinExist
     , compile
     , execute
     , msg
@@ -47,6 +48,9 @@ execute henv hscr args = do
           Nothing Nothing Nothing Nothing Nothing
     ec <- waitForProcess ph
     unless (ec == ExitSuccess) $ error $ hsName hscr ++ " execution failed"
+
+doesBinExist :: HsbinEnv -> HsbinScript -> IO Bool
+doesBinExist henv hscr = doesFileExist $ hsBinPath henv hscr
 
 cleanBin :: HsbinEnv -> HsbinConfig -> IO [FilePath]
 cleanBin henv hcfg = do

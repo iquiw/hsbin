@@ -67,7 +67,8 @@ actRun henv hcfg (name:args) =
         Just hscr -> do
             h <- hscrHash hscr
             b <- eqHash henv hscr h
-            unless b $ do
+            e <- doesBinExist henv hscr
+            unless (b && e) $ do
                 compile henv hscr
                 writeHash henv hscr h
             execute henv hscr args
@@ -91,7 +92,8 @@ actUpdate henv hcfg args =
     update force hscr = do
         h <- hscrHash hscr
         same <- eqHash henv hscr h
-        let (needCompile, tag) = case (same, force) of
+        e <- doesBinExist henv hscr
+        let (needCompile, tag) = case (same && e, force) of
                 (False, _)    -> (True,  align 12 "[COMPILED]")
                 (True, False) -> (False, align 12 "[LATEST]")
                 (True, True)  -> (True,  align 12 "[FORCE]")
