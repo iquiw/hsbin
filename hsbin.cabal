@@ -24,7 +24,7 @@ executable hsbin
                        Hsbin.Routine
                        Hsbin.Types
   -- other-extensions:    
-  build-depends:       base >=4.6 && <4.8,
+  build-depends:       base >=4.6 && <4.10,
                        bytestring,
                        directory,
                        filepath,
