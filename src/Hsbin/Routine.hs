@@ -24,8 +24,8 @@ import System.Process
 
 import Hsbin.Types
 
-compile :: HsbinEnv -> HsbinScript -> IO ()
-compile henv hscr = do
+compile :: HsbinEnv -> HsbinConfig -> HsbinScript -> IO ()
+compile henv hcfg hscr = do
     createDirectoryIfMissing True tmpDir
     go `finally` removeDirectoryRecursive tmpDir
   where
@@ -34,13 +34,18 @@ compile henv hscr = do
         let args = hsOpts hscr ++ [ "-outputdir", tmpDir
                                   , "-o", hsTmpBinPath henv hscr
                                   , hsPath hscr]
-        ph <- runProcess "ghc" args Nothing Nothing Nothing Nothing Nothing
+        ph <- run (hcBuildType hcfg) args
         ec <- waitForProcess ph
         case ec of
             ExitSuccess -> copyFile
                            (hsTmpBinPath henv hscr)
                            (hsBinPath henv hscr)
             _           -> error $ hsName hscr ++ " compilation failed"
+    run GHC args   = runProcess "ghc" args
+                     Nothing Nothing Nothing Nothing Nothing
+    run Stack args = runProcess "stack" (["ghc", "--"] ++ args)
+                     Nothing Nothing Nothing Nothing Nothing
+
 
 execute :: HsbinEnv -> HsbinScript -> [String] -> IO ()
 execute henv hscr args = do

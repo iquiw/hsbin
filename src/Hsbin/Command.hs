@@ -69,7 +69,7 @@ actRun henv hcfg (name:args) =
             b <- eqHash henv hscr h
             e <- doesBinExist henv hscr
             unless (b && e) $ do
-                compile henv hscr
+                compile henv hcfg hscr
                 writeHash henv hscr h
             execute henv hscr args
         Nothing   -> msgLn $ "Script not found: " ++ name
@@ -98,7 +98,7 @@ actUpdate henv hcfg args =
                 (True, False) -> (False, align 12 "[LATEST]")
                 (True, True)  -> (True,  align 12 "[FORCE]")
         if needCompile
-            then do compile henv hscr
+            then do compile henv hcfg hscr
                     writeHash henv hscr h
                     msgLn $ tag ++ hsName hscr
             else msgLn $ tag ++ hsName hscr

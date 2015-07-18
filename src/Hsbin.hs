@@ -29,4 +29,4 @@ initHsbin henv = do
     b <- doesFileExist configPath
     if b
         then readHsbinConfig configPath
-        else return $ HsbinConfig []
+        else return defaultHsbinConfig

@@ -1,4 +1,6 @@
 {
+  "build-type": "ghc",
+
   "scripts": [
     { "name": "foo"
     , "path": "/path/to/foo.hs"

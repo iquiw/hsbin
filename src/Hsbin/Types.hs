@@ -12,8 +12,11 @@ data HsbinEnv = HsbinEnv
     , heTmpDir :: FilePath
     } deriving (Eq, Show)
 
+data HsbinBuildType = GHC | Stack deriving (Eq, Show)
+
 data HsbinConfig = HsbinConfig
-    { hcScripts :: [HsbinScript]
+    { hcBuildType :: HsbinBuildType
+    , hcScripts   :: [HsbinScript]
     } deriving (Eq, Show)
 
 data HsbinScript = HsbinScript
@@ -22,12 +25,25 @@ data HsbinScript = HsbinScript
     , hsOpts :: [String]
     } deriving (Eq, Show)
 
+instance FromJSON HsbinBuildType where
+    parseJSON (String s) | s == "ghc"   = pure GHC
+                         | s == "stack" = pure Stack
+                         | otherwise    = fail "HsbinBuildType: unknown type"
+    parseJSON _                         = fail "HsbinBuildType: String expected"
+
+instance ToJSON HsbinBuildType where
+    toJSON GHC   = String "ghc"
+    toJSON Stack = String "stack"
+
 instance FromJSON HsbinConfig where
-    parseJSON (Object o) = HsbinConfig <$> (o .: "scripts")
+    parseJSON (Object o) = HsbinConfig
+                           <$> (o .: "build-type")
+                           <*> (o .: "scripts")
     parseJSON _          = fail "HsbinConfig: Object expected"
 
 instance ToJSON HsbinConfig where
-    toJSON (HsbinConfig s) = object [ "scripts" .= s ]
+    toJSON (HsbinConfig btype scripts) = object [ "build-type" .= btype
+                                                , "scripts" .= scripts ]
 
 instance FromJSON HsbinScript where
     parseJSON (Object o) = HsbinScript
@@ -41,6 +57,9 @@ instance ToJSON HsbinScript where
                                         , "path" .= p
                                         , "opts" .= o
                                         ]
+
+defaultHsbinConfig :: HsbinConfig
+defaultHsbinConfig = HsbinConfig GHC []
 
 exe :: FilePath -> FilePath
 exe = if os == "mingw32" then (<.> "exe") else id
