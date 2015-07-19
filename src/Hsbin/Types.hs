@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Hsbin.Types where
 
-import Control.Applicative ((<$>), (<*>))
+import Control.Applicative ((<$>), (<*>), pure)
 import Data.Aeson
 import Data.Maybe (listToMaybe)
 import System.FilePath ((<.>), (</>))
