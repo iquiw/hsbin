@@ -1,12 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Hsbin where
 
-import           Data.Aeson
-import qualified Data.ByteString.Lazy as LB
-import           System.Directory (createDirectoryIfMissing, doesFileExist)
+import Data.Yaml (decodeFileEither)
+import System.Directory (createDirectoryIfMissing, doesFileExist)
 
-import           Hsbin.Command
-import           Hsbin.Types
+import Hsbin.Command
+import Hsbin.Types
 
 runHsbin :: HsbinEnv -> HsbinConfig -> [String] -> IO ()
 runHsbin henv hcfg args = do
@@ -15,10 +14,10 @@ runHsbin henv hcfg args = do
 
 readHsbinConfig :: FilePath -> IO HsbinConfig
 readHsbinConfig file = do
-    b <- LB.readFile file
-    case eitherDecode' b of
+    e <- decodeFileEither file
+    case e of
         Right cfg -> return cfg
-        Left  err -> error err
+        Left  err -> error $ show err
 
 initHsbin :: HsbinEnv -> IO HsbinConfig
 initHsbin henv = do

@@ -2,7 +2,8 @@
 module Hsbin.Types where
 
 import Control.Applicative ((<$>), (<*>), pure)
-import Data.Aeson
+import Data.Yaml ( FromJSON(..), ToJSON(..), Value(..)
+                 , object, (.:), (.=) )
 import Data.Maybe (listToMaybe)
 import System.FilePath ((<.>), (</>))
 import System.Info (os)
@@ -65,7 +66,7 @@ exe :: FilePath -> FilePath
 exe = if os == "mingw32" then (<.> "exe") else id
 
 heConfigPath :: HsbinEnv -> FilePath
-heConfigPath =  (</> "config.json") . heAppDir
+heConfigPath =  (</> "config.yaml") . heAppDir
 
 heBinDir :: HsbinEnv -> FilePath
 heBinDir = (</> "bin") . heAppDir
